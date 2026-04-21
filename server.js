@@ -13,20 +13,21 @@ app.post('/api/chat', async (req, res) => {
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system,
-        messages: [{ role: 'user', content: user }]
-      })
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: `${system}\n\n${user}` }]
+            }
+          ]
+        })
+      }
+    );
 
     const data = await response.json();
 
@@ -34,7 +35,9 @@ app.post('/api/chat', async (req, res) => {
       return res.status(500).json({ error: data.error.message });
     }
 
-    res.json({ result: data.content?.[0]?.text || 'No response.' });
+    const result = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response.';
+    res.json({ result });
+
   } catch (err) {
     res.status(500).json({ error: 'Server error: ' + err.message });
   }
