@@ -25,17 +25,25 @@ app.post('/api/chat', async (req, res) => {
           { role: 'system', content: system },
           { role: 'user', content: user }
         ],
-        max_tokens: 2048
+        max_tokens: 2048,
+        temperature: 0.7
       })
     });
 
     const data = await response.json();
 
+    console.log('Groq response:', JSON.stringify(data));
+
     if (data.error) {
       return res.status(500).json({ error: data.error.message });
     }
 
-    const result = data.choices?.[0]?.message?.content || 'No response.';
+    const result = data.choices?.[0]?.message?.content;
+
+    if (!result) {
+      return res.status(500).json({ error: 'Empty response from AI' });
+    }
+
     res.json({ result });
 
   } catch (err) {
