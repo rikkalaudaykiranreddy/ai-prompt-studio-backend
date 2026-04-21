@@ -25,7 +25,7 @@ app.post('/api/chat', async (req, res) => {
           { role: 'system', content: system },
           { role: 'user', content: user }
         ],
-        max_tokens: 1000
+        max_tokens: 2048
       })
     });
 
